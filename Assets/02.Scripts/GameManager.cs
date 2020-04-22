@@ -12,9 +12,8 @@ public class GameManager : MonoBehaviour
     public Text BestScoreText;
     public Text PlusText;
     public GameObject GameOverUI;
-    public GameObject[] squarePrefabs;
-    //private Dictionary<string, Square> DicSquare = new Dictionary<string, Square>();
 
+    //GameObject[] squarePrefabs = new GameObject[17];
     GameObject[,] square = new GameObject[4, 4];
     int score;
     int plusScore;
@@ -28,10 +27,10 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        //Square[] resourcesSquare = Resources.LoadAll<Square>("Prefabs");
-        //for (int i = 0; i < resourcesSquare.Length; i++)
+        //// Prefabs 로드
+        //for (int i = 0; i < 17; i++)
         //{
-        //    DicSquare.Add(resourcesSquare[i].name, resourcesSquare[i]);
+        //    squarePrefabs[i] = Resources.Load<GameObject>("Prefabs/n_" + i);
         //}
 
         NewGameBtn.onClick.AddListener(() => { Restart(); });
@@ -177,7 +176,7 @@ public class GameManager : MonoBehaviour
                         {
                             Debug.Log("gameOver");
                             isGameOver = true;
-                            GameOverUI.SetActive(true);
+                            StartCoroutine("Cor_GameOver");
                         }
                     }
                 }
@@ -206,7 +205,7 @@ public class GameManager : MonoBehaviour
             for (int i = 0; i <= 16; i++)
             {
                 // i : 블럭(2, 4, 8, 16, ...)
-                if (square[x2, y2].name == squarePrefabs[i].name + "(Clone)")
+                if (square[x2, y2].name == ObjectPoolManager.Instance.poolList[i].name)
                 {
                     equalNum = i;
                     break;
@@ -215,8 +214,11 @@ public class GameManager : MonoBehaviour
             square[x1, y1].GetComponent<Square>().isDestory = true;
             square[x1, y1].GetComponent<Square>().Move(x2, y2);
             square[x1, y1] = null;
-            Destroy(square[x2, y2]);
-            square[x2, y2] = Instantiate(squarePrefabs[equalNum + 1], new Vector3(1.2f * x2 - 1.8f, 1.2f * y2 - 0.81f, 0), Quaternion.identity);
+            square[x2, y2].GetComponent<Square>().isDestory = false;
+            square[x2, y2].GetComponent<Square>().isMoving = false;
+            ObjectPoolManager.Instance.Free(square[x2, y2]);
+            square[x2, y2] = ObjectPoolManager.Instance.Get(equalNum + 1);
+            square[x2, y2].transform.position = new Vector3(1.2f * x2 - 1.8f, 1.2f * y2 - 0.81f, 0);
             square[x2, y2].GetComponent<Square>().isMerge = true;
             square[x2, y2].GetComponent<Animator>().SetTrigger("Merge");
 
@@ -237,7 +239,8 @@ public class GameManager : MonoBehaviour
         }
         if (isGameOver == false)
         {
-            square[x, y] = Instantiate(Random.Range(0, 10) > 2 ? squarePrefabs[0] : squarePrefabs[1], new Vector3(1.2f * x - 1.8f, 1.2f * y - 0.81f, 0), Quaternion.identity);
+            square[x, y] = Random.Range(0, 10) > 2 ? ObjectPoolManager.Instance.Get(0) : ObjectPoolManager.Instance.Get(1);
+            square[x, y].transform.position = new Vector3(1.2f * x - 1.8f, 1.2f * y - 0.81f, 0);
             square[x, y].GetComponent<Animator>().SetTrigger("Spawn");
         }
     }
@@ -259,5 +262,11 @@ public class GameManager : MonoBehaviour
     public void Restart()
     {
         SceneManager.LoadScene("puzzle2048");
+    }
+
+    IEnumerator Cor_GameOver()
+    {
+        yield return new WaitForSeconds(1);
+        GameOverUI.SetActive(true);
     }
 }

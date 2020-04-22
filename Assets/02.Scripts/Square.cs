@@ -6,7 +6,7 @@ public class Square : MonoBehaviour
     public bool isDestory;
 
     Transform tr;
-    bool isMoving;
+    public bool isMoving;
     int targetX; // 이동 될 좌표
     int targetY; // 이동 될 좌표
 
@@ -36,7 +36,8 @@ public class Square : MonoBehaviour
             isMoving = false;
             if (isDestory == true)
             {
-                Destroy(this.gameObject);
+                isDestory = false;
+                ObjectPoolManager.Instance.Free(this.gameObject);
             }
         }
     }
