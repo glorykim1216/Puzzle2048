@@ -36,9 +36,15 @@ public class Square : MonoBehaviour
             isMoving = false;
             if (isDestory == true)
             {
-                isDestory = false;
-                ObjectPoolManager.Instance.Free(this.gameObject);
+                Free();
             }
         }
+    }
+
+    public void Free()
+    {
+        isMoving = false;
+        isDestory = false;
+        ObjectPoolManager.Instance.Free(this.gameObject);
     }
 }

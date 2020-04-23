@@ -13,9 +13,9 @@ public class GameManager : MonoBehaviour
     public Text PlusText;
     public GameObject GameOverUI;
 
-    //GameObject[] squarePrefabs = new GameObject[17];
     GameObject[,] square = new GameObject[4, 4];
     int score;
+    int bestScore;
     int plusScore;
     int adjoinCount; // 인접한 블럭에 같은 숫자 갯수
     bool isDragging;
@@ -27,11 +27,9 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        //// Prefabs 로드
-        //for (int i = 0; i < 17; i++)
-        //{
-        //    squarePrefabs[i] = Resources.Load<GameObject>("Prefabs/n_" + i);
-        //}
+        DBManager.Instance.Load();
+        bestScore = DBManager.Instance.ItemList.score;
+        BestScoreText.text = bestScore.ToString();
 
         NewGameBtn.onClick.AddListener(() => { Restart(); });
         RestartBtn.onClick.AddListener(() => { Restart(); });
@@ -151,7 +149,6 @@ public class GameManager : MonoBehaviour
 
                     if (isEmptySqure == false)
                     {
-                        Debug.Log("full");
                         // 가로, 세로 인접한 블럭이 같은 숫자이면 adjoinCount++
                         for (int y = 0; y <= 3; y++)
                         {
@@ -169,12 +166,10 @@ public class GameManager : MonoBehaviour
                                     adjoinCount++;
                             }
                         }
-                        Debug.Log("adjoinCount:" + adjoinCount);
 
                         // 인접한 블럭이 하나도 없으면 게임오버
                         if (adjoinCount == 0)
                         {
-                            Debug.Log("gameOver");
                             isGameOver = true;
                             StartCoroutine("Cor_GameOver");
                         }
@@ -214,9 +209,8 @@ public class GameManager : MonoBehaviour
             square[x1, y1].GetComponent<Square>().isDestory = true;
             square[x1, y1].GetComponent<Square>().Move(x2, y2);
             square[x1, y1] = null;
-            square[x2, y2].GetComponent<Square>().isDestory = false;
-            square[x2, y2].GetComponent<Square>().isMoving = false;
-            ObjectPoolManager.Instance.Free(square[x2, y2]);
+            square[x2, y2].GetComponent<Square>().Free();
+
             square[x2, y2] = ObjectPoolManager.Instance.Get(equalNum + 1);
             square[x2, y2].transform.position = new Vector3(1.2f * x2 - 1.8f, 1.2f * y2 - 0.81f, 0);
             square[x2, y2].GetComponent<Square>().isMerge = true;
@@ -254,7 +248,11 @@ public class GameManager : MonoBehaviour
             PlusText.GetComponent<Animator>().SetTrigger("Plus");
             score += plusScore;
             ScoreText.text = score.ToString();
-            BestScoreText.text = score.ToString();
+            if (score > bestScore)
+            {
+                bestScore = score;
+                BestScoreText.text = bestScore.ToString();
+            }
             plusScore = 0;
         }
     }
@@ -267,6 +265,7 @@ public class GameManager : MonoBehaviour
     IEnumerator Cor_GameOver()
     {
         yield return new WaitForSeconds(1);
+        DBManager.Instance.UpdateItemTable(bestScore);
         GameOverUI.SetActive(true);
     }
 }

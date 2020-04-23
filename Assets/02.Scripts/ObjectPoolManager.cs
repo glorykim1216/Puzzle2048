@@ -33,11 +33,6 @@ public class ObjectPoolManager : MonoSingleton<ObjectPoolManager>
         InitObjectPool();
         
     }
-    void Start()
-    {
-        Debug.Log("시작");
-
-    }
 
     // 오브젝트를 불러옴
     public GameObject Get(int _num)
