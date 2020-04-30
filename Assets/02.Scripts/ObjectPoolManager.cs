@@ -19,7 +19,7 @@ public class ObjectPoolManager : MonoSingleton<ObjectPoolManager>
     public GameObject[] poolList = new GameObject[17];    // 오브젝트 리스트
     public int[] poolAmount;        // 갯수
     public List<ObjectPool> objectPoolList = new List<ObjectPool>();
-
+    public int SpriteNum;
     public override void Init()
     {
     }
@@ -31,7 +31,7 @@ public class ObjectPoolManager : MonoSingleton<ObjectPoolManager>
             poolList[i] = Resources.Load<GameObject>("Prefabs/n_" + i);
         }
         InitObjectPool();
-        
+        StartCoroutine("Cor_ChangeSpriteNum");
     }
 
     // 오브젝트를 불러옴
@@ -55,6 +55,7 @@ public class ObjectPoolManager : MonoSingleton<ObjectPoolManager>
         else    // 사용 가능한 오브젝트가 없을떄
         {
             obj = Instantiate(pool.source);
+            obj.GetComponent<Square>().Init((int)Mathf.Pow(2, _num + 1));
             obj.transform.parent = pool.folder.transform;
             obj.name = pool.folder.name;
         }
@@ -100,16 +101,30 @@ public class ObjectPoolManager : MonoSingleton<ObjectPoolManager>
             for (int j = 0; j < amount; j++)
             {
                 GameObject go = Instantiate(objectPool.source);
+                // 2의 n승
+                go.GetComponent<Square>().Init((int)Mathf.Pow(2, i + 1));
                 go.SetActive(false);
                 go.transform.parent = folder.transform;
                 go.name = folder.name;
                 objectPool.unusedList.Add(go);
 
                 // 한번에 풀을 생성할때 부하를 줄이기 위해서 코루틴 사용
-               // yield return new WaitForEndOfFrame();
+                // yield return new WaitForEndOfFrame();
             }
 
             objectPool.maxAmount = amount;
+        }
+    }
+    IEnumerator Cor_ChangeSpriteNum()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(0.03f);
+
+            if (SpriteNum < 49)
+                SpriteNum++;
+            else
+                SpriteNum = 0;
         }
     }
 }

@@ -6,11 +6,13 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    public Button RankBtn;
     public Button NewGameBtn;
     public Button RestartBtn;
     public Text ScoreText;
     public Text BestScoreText;
     public Text PlusText;
+    public GameObject RankUI;
     public GameObject GameOverUI;
 
     GameObject[,] square = new GameObject[4, 4];
@@ -31,9 +33,9 @@ public class GameManager : MonoBehaviour
         bestScore = DBManager.Instance.ItemList.score;
         BestScoreText.text = bestScore.ToString();
 
+        RankBtn.onClick.AddListener(() => { });
         NewGameBtn.onClick.AddListener(() => { Restart(); });
         RestartBtn.onClick.AddListener(() => { Restart(); });
-
         Spawn();
         Spawn();
     }
@@ -203,18 +205,21 @@ public class GameManager : MonoBehaviour
                 if (square[x2, y2].name == ObjectPoolManager.Instance.poolList[i].name)
                 {
                     equalNum = i;
+                    int a =(int)Mathf.Pow(2, equalNum + 2);
                     break;
                 }
             }
             square[x1, y1].GetComponent<Square>().isDestory = true;
             square[x1, y1].GetComponent<Square>().Move(x2, y2);
             square[x1, y1] = null;
-            square[x2, y2].GetComponent<Square>().Free();
 
+            square[x2, y2].GetComponent<Square>().Free();
+ 
             square[x2, y2] = ObjectPoolManager.Instance.Get(equalNum + 1);
             square[x2, y2].transform.position = new Vector3(1.2f * x2 - 1.8f, 1.2f * y2 - 0.81f, 0);
             square[x2, y2].GetComponent<Square>().isMerge = true;
-            square[x2, y2].GetComponent<Animator>().SetTrigger("Merge");
+            square[x2, y2].GetComponent<Square>().Merge();
+            //square[x2, y2].GetComponent<Animator>().SetTrigger("Merge");
 
             plusScore += (int)Mathf.Pow(2, equalNum + 2);
         }
@@ -233,9 +238,10 @@ public class GameManager : MonoBehaviour
         }
         if (isGameOver == false)
         {
-            square[x, y] = Random.Range(0, 10) > 2 ? ObjectPoolManager.Instance.Get(0) : ObjectPoolManager.Instance.Get(1);
+            square[x, y] = Random.Range(0, 8) > 1 ? ObjectPoolManager.Instance.Get(0) : ObjectPoolManager.Instance.Get(1);
             square[x, y].transform.position = new Vector3(1.2f * x - 1.8f, 1.2f * y - 0.81f, 0);
-            square[x, y].GetComponent<Animator>().SetTrigger("Spawn");
+            square[x, y].GetComponent<Square>().Spawn();
+            //square[x, y].GetComponent<Animator>().SetTrigger("Spawn");
         }
     }
 
@@ -255,6 +261,11 @@ public class GameManager : MonoBehaviour
             }
             plusScore = 0;
         }
+    }
+
+    public void ShowRankUI()
+    {
+        RankUI.SetActive(true);
     }
 
     public void Restart()
