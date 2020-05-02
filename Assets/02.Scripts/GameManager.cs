@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    public Button RankDoneBtn;
     public Button RankBtn;
     public Button NewGameBtn;
     public Button RestartBtn;
@@ -14,6 +15,7 @@ public class GameManager : MonoBehaviour
     public Text PlusText;
     public GameObject RankUI;
     public GameObject GameOverUI;
+    public firebaseDB firebase;
 
     GameObject[,] square = new GameObject[4, 4];
     int score;
@@ -24,6 +26,7 @@ public class GameManager : MonoBehaviour
     bool isMoving;
     bool isEmptySqure;  // 빈공간 확인
     bool isGameOver;
+    bool isShowRankUI;
     Vector3 firstPos;
     Vector3 dragDirection;
 
@@ -33,11 +36,16 @@ public class GameManager : MonoBehaviour
         bestScore = DBManager.Instance.ItemList.score;
         BestScoreText.text = bestScore.ToString();
 
-        RankBtn.onClick.AddListener(() => { });
+        RankDoneBtn.onClick.AddListener(() => { RankDone(); });
+        RankBtn.onClick.AddListener(() => { ShowRankUI(); });
         NewGameBtn.onClick.AddListener(() => { Restart(); });
         RestartBtn.onClick.AddListener(() => { Restart(); });
         Spawn();
         Spawn();
+
+        //DB 초기화 (Score)
+        //DBManager.Instance.UpdateItemTable(0);
+
     }
 
     // Update is called once per frame
@@ -47,7 +55,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
             Application.Quit();
 
-        if (isGameOver == true)
+        if (isGameOver == true || isShowRankUI == true)
             return;
 
         // Input (mouse & touch)
@@ -263,8 +271,16 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void RankDone()
+    {
+        isShowRankUI = false;
+        RankUI.SetActive(false);
+    }
+
     public void ShowRankUI()
     {
+        isShowRankUI = true;
+        firebase.ShowRankList();
         RankUI.SetActive(true);
     }
 
@@ -278,5 +294,6 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(1);
         DBManager.Instance.UpdateItemTable(bestScore);
         GameOverUI.SetActive(true);
+        firebase.ScoreCheck(score);
     }
 }

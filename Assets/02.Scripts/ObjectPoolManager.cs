@@ -16,7 +16,7 @@ public class ObjectPool
 public class ObjectPoolManager : MonoSingleton<ObjectPoolManager>
 {
     public int defaultAmount = 0;
-    public GameObject[] poolList = new GameObject[17];    // 오브젝트 리스트
+    public GameObject[] poolList = new GameObject[12];    // 오브젝트 리스트
     public int[] poolAmount;        // 갯수
     public List<ObjectPool> objectPoolList = new List<ObjectPool>();
     public int SpriteNum;
@@ -26,7 +26,7 @@ public class ObjectPoolManager : MonoSingleton<ObjectPoolManager>
     private void Awake()
     {
         // Prefabs 로드
-        for (int i = 0; i < 17; i++)
+        for (int i = 0; i < 12; i++)
         {
             poolList[i] = Resources.Load<GameObject>("Prefabs/n_" + i);
         }
