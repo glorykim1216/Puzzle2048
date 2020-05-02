@@ -40,8 +40,14 @@ public class GameManager : MonoBehaviour
         RankBtn.onClick.AddListener(() => { ShowRankUI(); });
         NewGameBtn.onClick.AddListener(() => { Restart(); });
         RestartBtn.onClick.AddListener(() => { Restart(); });
+
+        // 광고 초기화
+        AdmobBanner.Instance.Init();
+        AdmobReward.Instance.Init();
+
         Spawn();
         Spawn();
+
 
         //DB 초기화 (Score)
         //DBManager.Instance.UpdateItemTable(0);
@@ -213,7 +219,7 @@ public class GameManager : MonoBehaviour
                 if (square[x2, y2].name == ObjectPoolManager.Instance.poolList[i].name)
                 {
                     equalNum = i;
-                    int a =(int)Mathf.Pow(2, equalNum + 2);
+                    int a = (int)Mathf.Pow(2, equalNum + 2);
                     break;
                 }
             }
@@ -222,7 +228,7 @@ public class GameManager : MonoBehaviour
             square[x1, y1] = null;
 
             square[x2, y2].GetComponent<Square>().Free();
- 
+
             square[x2, y2] = ObjectPoolManager.Instance.Get(equalNum + 1);
             square[x2, y2].transform.position = new Vector3(1.2f * x2 - 1.8f, 1.2f * y2 - 0.81f, 0);
             square[x2, y2].GetComponent<Square>().isMerge = true;
@@ -291,9 +297,11 @@ public class GameManager : MonoBehaviour
 
     IEnumerator Cor_GameOver()
     {
+        firebase.ScoreCheck(score);
         yield return new WaitForSeconds(1);
         DBManager.Instance.UpdateItemTable(bestScore);
         GameOverUI.SetActive(true);
-        firebase.ScoreCheck(score);
+
+        AdmobReward.Instance.ShowRewardAd();
     }
 }

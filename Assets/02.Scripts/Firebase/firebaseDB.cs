@@ -36,6 +36,8 @@ public class firebaseDB : MonoBehaviour
 
     public void ScoreCheck(int _score)
     {
+        score = _score;
+
         FirebaseDatabase.DefaultInstance.GetReference("top10scores").OrderByChild("score").LimitToFirst(1)
             .GetValueAsync().ContinueWith(task =>
             {
@@ -49,23 +51,22 @@ public class firebaseDB : MonoBehaviour
                     foreach (var item in snapshot.Children)
                     {
                         lastPlace = System.Convert.ToInt32(item.Child("score").Value);
-
                     }
                     // Do something with snapshot... 
                 }
             });
 
-        if (_score > lastPlace)
-        {
-            score = _score;
-            ShowRegistration();
-        }
+        StartCoroutine("ShowRegistration");
     }
 
-    void ShowRegistration()
+    IEnumerator ShowRegistration()
     {
-        scoreText.text = score.ToString();
-        RegistrationUI.SetActive(true);
+        yield return new WaitForSeconds(2f);
+        if (score > lastPlace)
+        {
+            scoreText.text = score.ToString();
+            RegistrationUI.SetActive(true);
+        }
     }
 
     void OkBtn()
