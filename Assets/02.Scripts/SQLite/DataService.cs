@@ -85,8 +85,9 @@ public class DataService
         {
                 new DB
                 {
-                    ID= 1,
-                    score =0
+                    ID = 1,
+                    score = 0,
+                    sound = 1
                 }
             });
     }

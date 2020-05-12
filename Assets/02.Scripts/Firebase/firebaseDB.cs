@@ -12,18 +12,20 @@ public class firebaseDB : MonoBehaviour
     public GameObject LoadingUI;
 
     public InputField nameInputField;
+    public InputField emailInputField;
     public Text scoreText;
     public Button OKBtn;
 
     public Text[] RankNameTxt;
     public Text[] RankScoreTxt;
 
-    public string[] rankName = new string[10];
-    public string[] rankScore = new string[10];
+    string[] rankName = new string[10];
+    string[] rankScore = new string[10];
 
     int lastPlace;
     int score;
     string userName;
+    string userEmail;
 
     void Start()
     {
@@ -38,7 +40,7 @@ public class firebaseDB : MonoBehaviour
     {
         score = _score;
 
-        FirebaseDatabase.DefaultInstance.GetReference("top10scores").OrderByChild("score").LimitToFirst(1)
+        FirebaseDatabase.DefaultInstance.GetReference("top10").OrderByChild("score").LimitToFirst(1)
             .GetValueAsync().ContinueWith(task =>
             {
                 if (task.IsFaulted)
@@ -72,6 +74,7 @@ public class firebaseDB : MonoBehaviour
     void OkBtn()
     {
         userName = nameInputField.text;
+        userEmail = emailInputField.text;
         OnClickMaxScores();
         RegistrationUI.SetActive(false);
     }
@@ -87,7 +90,7 @@ public class firebaseDB : MonoBehaviour
 
         FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://puzzle2048-56b51.firebaseio.com/");
 
-        FirebaseDatabase.DefaultInstance.GetReference("top10scores").OrderByChild("score").LimitToFirst(10)
+        FirebaseDatabase.DefaultInstance.GetReference("top10").OrderByChild("score").LimitToFirst(10)
     .GetValueAsync().ContinueWith(task =>
     {
         if (task.IsFaulted)
@@ -124,7 +127,7 @@ public class firebaseDB : MonoBehaviour
         const int MaxScoreRecordCount = 10;
 
         DatabaseReference mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
-        mDatabaseRef.Child("top10scores").RunTransaction(mutableData =>
+        mDatabaseRef.Child("top10").RunTransaction(mutableData =>
         {
             List<object> leaders = mutableData.Value as List<object>;
 
@@ -163,6 +166,8 @@ public class firebaseDB : MonoBehaviour
             Dictionary<string, object> entryValues = new Dictionary<string, object>();
             entryValues.Add("score", score);
             entryValues.Add("name", userName);
+            entryValues.Add("email", userEmail);
+
             leaders.Add(entryValues);
 
             mutableData.Value = leaders;

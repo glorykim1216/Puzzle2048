@@ -5,10 +5,11 @@ public class DB
 {
     [PrimaryKey] public int ID { get; set; }
     public int score { get; set; }
+    public int sound { get; set; }
 
     public override string ToString()
     {
-        return string.Format("[DatabaseTable: ID={0}, Gold={1}]", this.ID, this.score);
+        return string.Format("[DatabaseTable: ID={0}, Score={1}, Sound={2}]", this.ID, this.score, this.sound);
     }
 }
 
@@ -16,7 +17,7 @@ public class DBManager : MonoSingleton<DBManager>
 {
     public DB ItemList;  // db에 있는 아이템을 저장할 리스트
 
-    string m_NameDB = "MyDB.db";  // db 파일 이름
+    string m_NameDB = "MyDB1.db";  // db 파일 이름
 
     DataService ds;
 
@@ -40,7 +41,7 @@ public class DBManager : MonoSingleton<DBManager>
         return true;
     }
 
-    public void UpdateItemTable(int _score)
+    public void UpdateItemTable_Score(int _score)
     {
         IEnumerable<DB> DBs = ds.GetDB();
 
@@ -49,6 +50,21 @@ public class DBManager : MonoSingleton<DBManager>
             foreach (DB DB in DBs)
             {
                 DB.score = _score;
+
+                ItemList = DB;
+            }
+            ds._connection.UpdateAll(DBs);
+        }
+    }
+    public void UpdateItemTable_Sound(int _sound)
+    {
+        IEnumerable<DB> DBs = ds.GetDB();
+
+        if (DBs != null)
+        {
+            foreach (DB DB in DBs)
+            {
+                DB.sound = _sound;
 
                 ItemList = DB;
             }
